@@ -1,4 +1,4 @@
-# UPI Fraud Detection System
+# Credit Card Fraud Detection System
 
 ## Objective
 Detect fraudulent UPI transactions using machine learning.
