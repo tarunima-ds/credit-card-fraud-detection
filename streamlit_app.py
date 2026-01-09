@@ -1,11 +1,19 @@
 import streamlit as st
 import pandas as pd
 import joblib
-
+import io
+import requests
 st.set_page_config(page_title="Credit Card Fraud Detection", layout="centered")
 
-# Load model
-model = joblib.load("fraud_pipeline.joblib")
+
+@st.cache_resource
+def load_model():
+    url = "https://example.com/fraud_pipeline.joblib"
+    response = requests.get(url)
+    return joblib.load(io.BytesIO(response.content))
+
+model = load_model()
+
 
 st.title("Credit Card Fraud Detection")
 st.write("Enter transaction details and get fraud prediction.")
