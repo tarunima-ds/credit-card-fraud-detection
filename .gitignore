@@ -1,0 +1,19 @@
+# Ignore datasets
+*.csv
+data/
+datasets/
+
+# Ignore trained models
+*.joblib
+models/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Secrets
+.env
