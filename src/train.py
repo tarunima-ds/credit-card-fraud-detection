@@ -1,89 +1,35 @@
 import pandas as pd
 import numpy as np
-
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, confusion_matrix
 import joblib
-import os
+from pathlib import Path
 
-# 1️⃣ Load Dataset
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
 
-DATA_PATH = "data/transactions.csv"   # change if filename is different
+# Create dummy training data
+X = pd.DataFrame({
+    "amount": np.random.rand(100) * 1000,
+    "oldbalanceOrg": np.random.rand(100) * 5000,
+    "newbalanceOrig": np.random.rand(100) * 4000,
+})
 
-df = pd.read_csv(DATA_PATH)
+y = np.random.randint(0, 2, size=100)
 
-print("Dataset loaded successfully")
-print(df.head())
-
-
-# 2️⃣ Define Features & Target
-
-TARGET = "is_fraud"
-
-X = df.drop(columns=[TARGET])
-y = df[TARGET]
-
-# 3️⃣ Identify Column Types
-
-categorical_features = X.select_dtypes(include=["object"]).columns.tolist()
-numerical_features = X.select_dtypes(include=["int64", "float64"]).columns.tolist()
-
-print("Categorical Features:", categorical_features)
-print("Numerical Features:", numerical_features)
-
-
-# 4️⃣ Preprocessing Pipelines
-
-numeric_transformer = Pipeline(steps=[
-    ("scaler", StandardScaler())
-])
-
-categorical_transformer = Pipeline(steps=[
-    ("encoder", OneHotEncoder(handle_unknown="ignore"))
-])
-
-preprocessor = ColumnTransformer(
-    transformers=[
-        ("num", numeric_transformer, numerical_features),
-        ("cat", categorical_transformer, categorical_features)
+# Build pipeline
+model = Pipeline(
+    steps=[
+        ("scaler", StandardScaler()),
+        ("classifier", LogisticRegression())
     ]
 )
 
-# 5️⃣ Full ML Pipeline
+# Train
+model.fit(X, y)
 
-model = Pipeline(steps=[
-    ("preprocessor", preprocessor),
-    ("classifier", LogisticRegression(max_iter=1000))
-])
+# Save model
+MODEL_DIR = Path("models")
+MODEL_DIR.mkdir(exist_ok=True)
 
-
-# 6️⃣ Train-Test Split
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y,
-    test_size=0.2,
-    random_state=42,
-    stratify=y
-)
-
-# 7️⃣ Train Model
-
-print("Training started...")
-model.fit(X_train, y_train)
-print("Training completed")
-
-
-# 8️⃣ Evaluation
-y_pred = model.predict(X_test)
-
-print("\nClassification Report:")
-print(classification_report(y_test, y_pred))
-
-print("\nConfusion Matrix:")
-print(confusion_matrix(y_test, y_pred))
-
-
+joblib.dump(model, MODEL_DIR / "fraud_pipeline.joblib")
+print("✅ Dummy model saved successfully")
